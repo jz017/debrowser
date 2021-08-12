@@ -1,7 +1,10 @@
 ---
 title: "DEBrowser user guide"
 author: "Alper Kucukural, Onur Yukselen, Manuel Garber"
-output: BiocStyle::html_document
+output:
+    rmarkdown::html_document:
+    highlight: pygments
+    toc: true
 fig_caption: true
 vignette: >
     %\VignetteIndexEntry{DEBrowser Vignette}
