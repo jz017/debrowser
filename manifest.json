@@ -15,7 +15,11 @@
       "checksum": "b448807b8fb2d44e049c8d54dc8b2074"
     },
     "DESCRIPTION": {
+<<<<<<< HEAD
       "checksum": "f80f48176dbb1ee70d69f5f49a34b627"
+=======
+      "checksum": "79e30e901fcf9b732f056256dc802f54"
+>>>>>>> origin/master
     },
     "inst/CITATION": {
       "checksum": "2e5f7315243a891daf649a37aef8f896"
