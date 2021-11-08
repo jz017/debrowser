@@ -215,9 +215,14 @@ runDESeq2 <- function(data = NULL, columns = NULL, conds = NULL, params = NULL) 
     res <- results(dds)
     if (shrinkage != "None"){
         res <- lfcShrink(dds, coef=2, res=res, type = shrinkage)
-        stat <- dds@rowRanges@elementMetadata[paste0(testType, "Statistic")]
+        if (testType == "Wald"){
+           colname <- names(dds@rowRanges@elementMetadata)[grepl(paste0(testType, "Statistic_group"), names(dds@rowRanges@elementMetadata))]
+        }else{
+           colname <- paste0(testType, "Statistic")
+        }
+        stat <- dds@rowRanges@elementMetadata[colname]
         res <- cbind(res, stat)
-        colnames(res)[colnames(res) == paste0(testType, "Statistic")] <- "stat"
+        colnames(res)[colnames(res) == colname] <- "stat"
     }
     return(res)
 }
