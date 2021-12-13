@@ -184,7 +184,7 @@ getConditionSelectorFromMeta <- function(metadata = NULL, input = NULL, index = 
      if (!is.null(metadata)){
         selected_meta <- selectedInput("conditions_from_meta", 
             index, NULL, input)
-        
+            
         if (is.null(selected_meta)) selected_meta <- "No Selection"
     
         if (selected_meta != "No Selection"){
@@ -193,18 +193,27 @@ getConditionSelectorFromMeta <- function(metadata = NULL, input = NULL, index = 
         if(!is.null(input[[paste0("condition", num)]])){
             selected <- input[[paste0("condition", num)]]
         } 
-        meta_choices_all <- NULL
-        if (!is.null(selected_meta))
-            meta_choices_all <- get_conditions_given_selection(metadata,
-                                        selected_meta)
-        if(old_selection != selected_meta){
-            if(typeof(meta_choices_all) == "character"){
-                meta_choices <- list("There must be exactly 2 groups.")
-            } else{
-                meta1 <- meta_choices_all[[2 - (num %% 2)]]
-                meta_choices <- unlist(meta1, recursive=FALSE)
+        grps <- unique(metadata[selected_meta])
+        grps <- grps[grps!="NA"]
+        grps<- grps[!is.na(grps) ]
+        if (length(grps) == 2) {
+            meta_choices_all <- NULL
+            if (!is.null(selected_meta))
+                meta_choices_all <- get_conditions_given_selection(metadata,
+                                            selected_meta)
+            if(old_selection != selected_meta){
+                if(typeof(meta_choices_all) == "character"){
+                    meta_choices <- list("There must be exactly 2 groups.")
+                } else{
+                    meta1 <- meta_choices_all[[2 - (num %% 2)]]
+                    meta_choices <- unlist(meta1, recursive=FALSE)
+                }
+                selected <- meta_choices
             }
-            selected <- meta_choices
+        }else{
+            if(!is.null(input[[paste0("group", num)]])){
+                selected <- metadata[metadata[,selected_meta] == input[[paste0("group", num)]], 1]
+            }
         }
     
         a <- list(column(6, selectInput(paste0("condition", num),
@@ -309,6 +318,8 @@ selectConditions<-function(Dataset = NULL,
             selected1 <- selectedSamples(2 * i - 1)
             selected2 <- selectedSamples( 2 * i )
             to_return <- list(column(12, getMetaSelector(metadata = metadata, input=input, n = i),
+                    getGroupSelector(metadata, input, i, (2*i-1)),
+                    getGroupSelector(metadata, input, i, (2*i)),
                     getConditionSelectorFromMeta(metadata, input, i,
                         (2 * i - 1), allsamples, selected1),
                     getConditionSelectorFromMeta(metadata, input, i,
@@ -331,11 +342,10 @@ selectConditions<-function(Dataset = NULL,
                 facts <- levels(factor(metadata[,selectedInput("conditions_from_meta", 
                      i, NULL, input)]))
                 facts <- facts[facts != "" & facts != "NA"]
-                if (length(facts) != 2) {
-                    showNotification("There must be exactly 2 groups in the selected condition. 
-                         Please use NA or space to remove extra sample groups from metadata selection.", 
+                if (length(facts) < 2) {
+                    showNotification("There must be more than 2 groups in the selected condition.", 
                          type = "error")
-                     updateSelectInput(session, paste0("conditions_from_meta", i), selected="No Selection" )
+                    updateSelectInput(session, paste0("conditions_from_meta", i), selected="No Selection" )
                 }
             }
             
@@ -374,6 +384,39 @@ selectConditions<-function(Dataset = NULL,
             return(to_return)
         })
     }
+}
+
+#' getGroupSelector
+#' Return the groups 
+#'
+#' @param metadata, meta data table
+#' @param input, input params
+#' @param index, index
+#' @param num, num
+#' @return meta select box
+#'
+#' @examples
+#'     x<-getGroupSelector()
+#' @export
+#'
+getGroupSelector <- function(metadata = NULL, input = NULL, index = 1, num=0) {
+    a <- NULL
+    selected_meta <- selectedInput("conditions_from_meta", 
+        index, NULL, input)
+    if (is.null(selected_meta) || selected_meta == "No Selection") return(NULL) 
+    grps <- unique(metadata[selected_meta])
+    grps <- grps[grps!="NA"]
+    grps<- grps[!is.na(grps) ]
+    if (length(grps) > 2) {
+        grps_choices <- c("No Selection", grps)
+        a <- list(column(6, selectInput(paste0("group", num),
+            label = paste0("Group ", num),
+            choices = grps_choices, 
+            selected =  selectedInput("group",
+                num, NULL, input),
+            multiple = FALSE)))
+    }
+    return(a)
 }
 
 #' getMetaSelector

@@ -306,7 +306,7 @@
       "checksum": "cd7462c17202f8218124a2d4acad83d9"
     },
     "man/getCovariateDetails.Rd": {
-      "checksum": "bb3392f06a64ff794d24b8d2e4a71bed"
+      "checksum": "796c28a92370cdca107eaa0e269c6c21"
     },
     "man/getCutOffSelection.Rd": {
       "checksum": "5b163812906bf3e08add47a06a008da8"
@@ -370,6 +370,9 @@
     },
     "man/getGOPlots.Rd": {
       "checksum": "2ca8f8c33689d42dd610505abed8c29c"
+    },
+    "man/getGroupSelector.Rd": {
+      "checksum": "6edaf22117061d3f1e96ac2c235d075b"
     },
     "man/getGSEA.Rd": {
       "checksum": "346a1c8d4d34e257452bd355c4eba7b7"
@@ -696,7 +699,7 @@
       "checksum": "88b0451641d862b77da4c397bb20151f"
     },
     "NAMESPACE": {
-      "checksum": "bb6a156d4f817e1322f0129636836fa2"
+      "checksum": "ec9148f2edcee1c7fbb0501711530a60"
     },
     "NEWS": {
       "checksum": "cbc74e10543a041c64168a7ce3b5d239"
@@ -714,7 +717,7 @@
       "checksum": "77fc5851b50eb8f3f42d9472d80455df"
     },
     "R/condSelect.R": {
-      "checksum": "7bbc84ea4cada28e1f344897d84b65f8"
+      "checksum": "3e6fc153f4be5308327879ea14c9ff7e"
     },
     "R/dataLoad.R": {
       "checksum": "4839d91183ea25801e4ffd0c85eaf8f6"
