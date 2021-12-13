@@ -44,18 +44,18 @@ debrowsercondselect <- function(input = NULL, output = NULL, session = NULL, dat
 #' @export
 #'
 condSelectUI<- function () {
-list(
-    shinydashboard::box(title = "Comparison Selection",
-        solidHeader = TRUE, status = "info",  width = NULL, height = NULL, collapsible = TRUE,
-    fluidRow(
-        uiOutput("conditionSelector"),
-        column(12,actionButtonDE("add_btn", "Add New Comparison",styleclass = "primary"),
-            actionButtonDE("rm_btn", "Remove", styleclass = "primary"),
-            getHelpButton("method", "http://debrowser.readthedocs.io/en/master/deseq/deseq.html"),
-            conditionalPanel(condition = ("output.condReady>0"),
-            actionButtonDE("startDE", "Start DE", styleclass = "primary")))
-    ))
-)
+    list(
+        shinydashboard::box(title = "Comparison Selection",
+            solidHeader = TRUE, status = "info",  width = NULL, height = NULL, collapsible = TRUE,
+        fluidRow(
+            uiOutput("conditionSelector"),
+            column(12,actionButtonDE("add_btn", "Add New Comparison",styleclass = "primary"),
+                actionButtonDE("rm_btn", "Remove", styleclass = "primary"),
+                getHelpButton("method", "http://debrowser.readthedocs.io/en/master/deseq/deseq.html"),
+                conditionalPanel(condition = ("output.condReady>0"),
+                actionButtonDE("startDE", "Start DE", styleclass = "primary")))
+        ))
+    )
 }
 #getMethodDetails
 #'
@@ -115,6 +115,29 @@ getMethodDetails <- function(num = 0, input = NULL) {
             br())
 }
 
+# getCovariateDetails
+#'
+#' get the covariate detail box after DE method selected 
+#'
+#' @param num, panel that is going to be shown
+#' @param input, user input
+#' @param metadata, metadata
+#' 
+#' @examples
+#'     x <- getCovariateDetails()
+#'
+#' @export
+#'
+getCovariateDetails <- function(num = 0, input = NULL, metadata = NULL) {
+    choices <- as.list(c(colnames(metadata)[2:ncol(metadata)]))
+    if (num > 0)
+        list(
+            getSelectInputBox("covariate", "Covariate", num, choices,
+                              selected = selectedInput("covariate", num, NULL, input), 
+                              2, multiple = TRUE)
+        )
+}
+
 #' getConditionSelector
 #'
 #' Selects user input conditions to run in DESeq.
@@ -129,7 +152,7 @@ getMethodDetails <- function(num = 0, input = NULL) {
 #'
 getConditionSelector<- function(num=0, choices = NULL, selected = NULL) {
     if (!is.null(choices))
-        list(column(6, selectInput(paste0("condition", num),
+        list(column(3, selectInput(paste0("condition", num),
             label = paste0("Condition ", num),
             choices = choices, multiple = TRUE,
             selected = selected)))
@@ -227,19 +250,20 @@ selectedInput <- function(id = NULL, num = 0, default = NULL,
 #' @param choices, sample list
 #' @param selected, selected smaple list
 #' @param cw, column width
+#' @param multiple, if multiple choices are available
 #' @examples
 #'     x <- getSelectInputBox()
 #'
 #' @export
 #'
 getSelectInputBox <- function(id = NULL, name = NULL, 
-                              num = 0, choices = NULL, selected = NULL,
-                              cw = 2) {
+                              num = 0, choices = NULL, selected = NULL, 
+                              cw = 2, multiple = FALSE) {
     if (is.null(id)) return(NULL)
     if (!is.null(choices))
         list(column(cw, selectInput(paste0(id, num),
             label = name,
-            choices = choices, multiple = FALSE,
+            choices = choices, multiple = multiple,
             selected = selected)))
 }
 
@@ -291,11 +315,16 @@ selectConditions<-function(Dataset = NULL,
                         (2 * i), allsamples, selected2)
             ),
             column(12, 
-                   column(1, helpText(" ")),
+                   # column(1, helpText(" ")),
                    getSelectInputBox("demethod", "DE Method", i, 
                         c("DESeq2", "EdgeR", "Limma"),
                         selectedInput("demethod", i, "DESeq2", input)),
-                   getMethodDetails(i, input)))
+                   getMethodDetails(i, input)),
+            column(12,
+                   getCovariateDetails(i, input, metadata = metadata))
+            )
+            
+            # check DE conditions
             if (!is.null(selectedInput("conditions_from_meta", 
                 i, NULL, input)) && selectedInput("conditions_from_meta", 
                 i, NULL, input) != "No Selection"){
@@ -309,6 +338,39 @@ selectConditions<-function(Dataset = NULL,
                      updateSelectInput(session, paste0("conditions_from_meta", i), selected="No Selection" )
                 }
             }
+            
+            # check covariates
+            if (!is.null(selectedInput("covariate", i, NULL, input))){
+                selected_metadata <- metadata[,selectedInput("covariate",i, NULL, input), drop = FALSE]
+                flag_selected <- rep(F,ncol(selected_metadata))
+                for(kk in 1:ncol(selected_metadata)){
+                    covariates <- selected_metadata[,kk]
+                    if (length(covariates) < 2) {
+                        showNotification("There must be at least 2 groups in the selected covariate.", 
+                                         type = "error")
+                        flag_selected[i] <- T
+                    }
+                }
+                new_selected <- selectedInput("covariate",i, NULL, input)[!flag_selected]
+                updateSelectInput(session, paste0("covariate", i), selected= new_selected)
+            }
+            
+            # update choices of the covariate
+            # if condition is selected, dont let the same column selected as covariate
+            # if condition and covariate is the same, reset covariate
+            metadata_columns <- colnames(metadata)[2:ncol(metadata)]
+            metadata_columns <- metadata_columns[!metadata_columns %in% selectedInput("conditions_from_meta", i, NULL, input)]
+            if(!is.null(selectedInput("conditions_from_meta", i, NULL, input)) && !is.null(selectedInput("covariate", i, NULL, input))){
+                if(selectedInput("conditions_from_meta", i, NULL, input) %in% selectedInput("covariate", i, NULL, input)){
+                    selected_meta <- selectedInput("covariate", i, NULL, input)
+                    selected_meta <- selected_meta[!selected_meta %in% selectedInput("conditions_from_meta", i, NULL, input)]
+                    updateSelectInput(session, paste0("covariate", i), choices = c(metadata_columns), 
+                                      selected = selected_meta)
+                    showNotification("Condition column is included in covariate list, removing!", 
+                                     type = "error")
+                } 
+            }
+            
             return(to_return)
         })
     }
@@ -427,6 +489,7 @@ getSampleNames <- function(cnames = NULL, part = 1) {
 #' @param data, loaded dataset
 #' @param counter, the number of comparisons
 #' @param input, input parameters
+#' @param meta, loaded metadata
 #' @return data
 #' @export
 #'
@@ -434,11 +497,10 @@ getSampleNames <- function(cnames = NULL, part = 1) {
 #'     x <- prepDataContainer()
 #'
 prepDataContainer <- function(data = NULL, counter=NULL, 
-                              input = NULL) {
+                              input = NULL, meta = NULL) {
     if (is.null(data)) return(NULL)
     
     inputconds <- reactiveValues(demethod_params = list(), conds = list(), dclist = list())
-
     inputconds$conds <- list()
     for (cnt in seq(1:(2*counter))){
         inputconds$conds[cnt] <- list(isolate(input[[paste0("condition",cnt)]]))
@@ -446,9 +508,12 @@ prepDataContainer <- function(data = NULL, counter=NULL,
     #Get parameters for each method
     inputconds$demethod_params <- NULL
     for (cnt in seq(1:counter)){
+        covariate <- isolate(paste(input[[paste0("covariate",cnt)]], collapse = "|"))
+        covariate <- ifelse(covariate == "", "NoCovariate", covariate)
         if (isolate(input[[paste0("demethod",cnt)]]) == "DESeq2"){
             inputconds$demethod_params[cnt] <- paste(
                 isolate(input[[paste0("demethod",cnt)]]),
+                covariate,
                 isolate(input[[paste0("fitType",cnt)]]),
                 isolate(input[[paste0("betaPrior",cnt)]]),
                 isolate(input[[paste0("testType",cnt)]]),
@@ -457,6 +522,7 @@ prepDataContainer <- function(data = NULL, counter=NULL,
         else if (isolate(input[[paste0("demethod",cnt)]]) == "EdgeR"){
             inputconds$demethod_params[cnt]<- paste(
                 isolate(input[[paste0("demethod",cnt)]]),
+                covariate,
                 isolate(input[[paste0("edgeR_normfact",cnt)]]),
                 isolate(input[[paste0("dispersion",cnt)]]),
                 isolate(input[[paste0("edgeR_testType",cnt)]]), sep=",")
@@ -464,6 +530,7 @@ prepDataContainer <- function(data = NULL, counter=NULL,
         else if (isolate(input[[paste0("demethod",cnt)]]) == "Limma"){
             inputconds$demethod_params[cnt] <- paste(
                 isolate(input[[paste0("demethod",cnt)]]),
+                covariate,
                 isolate(input[[paste0("limma_normfact",cnt)]]),
                 isolate(input[[paste0("limma_fitType",cnt)]]),
                 isolate(input[[paste0("normBetween",cnt)]]), sep=",")
@@ -479,7 +546,7 @@ prepDataContainer <- function(data = NULL, counter=NULL,
                   paste(inputconds$conds[[2*i]]))
         params <- unlist(strsplit(inputconds$demethod_params[i], ","))
         withProgress(message = 'Running DE Algorithms', detail = inputconds$demethod_params[i], value = 0, {
-            initd <- callModule(debrowserdeanalysis, paste0("DEResults",i), data = data, 
+            initd <- callModule(debrowserdeanalysis, paste0("DEResults",i), data = data, metadata = meta, 
                   columns = cols, conds = conds, params = params)
             if (!is.null(initd$dat()) && nrow(initd$dat()) > 1){
                 inputconds$dclist[[i]] <- list(conds = conds, cols = cols, init_data=initd$dat(), 
