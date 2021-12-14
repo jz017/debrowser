@@ -15,7 +15,7 @@
       "checksum": "b448807b8fb2d44e049c8d54dc8b2074"
     },
     "DESCRIPTION": {
-      "checksum": "2546f073973f758fc6ac6e81bbe3a94b"
+      "checksum": "abde504468b501533271c68ee290f367"
     },
     "inst/CITATION": {
       "checksum": "2e5f7315243a891daf649a37aef8f896"
@@ -717,7 +717,7 @@
       "checksum": "77fc5851b50eb8f3f42d9472d80455df"
     },
     "R/condSelect.R": {
-      "checksum": "3e6fc153f4be5308327879ea14c9ff7e"
+      "checksum": "c2d3366b3428fd74d59ca89e21c1954e"
     },
     "R/dataLoad.R": {
       "checksum": "4839d91183ea25801e4ffd0c85eaf8f6"
