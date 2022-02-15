@@ -13,7 +13,7 @@
 #'
 getBoxMainPlotUI <- function(id) {
   ns <- NS(id)
-  uiOutput(ns("BoxMainUI"))
+  uiOutput(ns("BoxMainUIIII"))
   print(id)
 }
 
