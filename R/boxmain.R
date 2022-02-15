@@ -14,6 +14,7 @@
 getBoxMainPlotUI <- function(id) {
   ns <- NS(id)
   uiOutput(ns("BoxMainUI"))
+  print(id)
 }
 
 #' debrowserboxmainplot
