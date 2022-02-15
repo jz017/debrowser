@@ -13,7 +13,7 @@
 #'
 getBoxMainPlotUI <- function(id) {
   ns <- NS(id)
-  uiOutput(ns("BoxMainUIIII"))
+  uiOutput(ns("BoxMainUI"))
   print(id)
 }
 
@@ -46,7 +46,7 @@ debrowserboxmainplot <- function(input = NULL, output = NULL, session = NULL, da
     shinydashboard::box(
         collapsible = TRUE, title = session$ns("plot"), status = "primary", 
         solidHeader = TRUE, width = NULL,
-        draggable = TRUE,  plotlyOutput(session$ns("BoxMain"),
+        draggable = TRUE,  plotlyOutput(session$ns("BoxMainnnnnnnn"),
             height=input$height, width=input$width))
     })
 }
