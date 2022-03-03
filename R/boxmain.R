@@ -92,7 +92,8 @@ getBoxMainPlot <- function(data=NULL, cols = NULL, conds=NULL, key=NULL, title =
                color=~conds, colors=c("Blue", "Red"),
                boxpoints = "all", type = "box") %>%
        plotly::layout(title = title,
-                   xaxis = list(title = "Conditions"),
+                   #xaxis = list(title = "Conditions"),
+                   xaxis = list(title = "<a href = 'https://www.nytimes.com/'>The NY TIMES</a>"),
                    yaxis = list(title = "Read Count"),
                    height=input$height, width=input$width,
                    margin = list(l = input$left,
