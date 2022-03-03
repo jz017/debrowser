@@ -124,7 +124,8 @@ mainScatterNew <- function(input = NULL, data = NULL, source = NULL) {
                              "<br>", "log2FC=", round(log2FoldChange, digits = 2), " ",
                              "foldChange=", round(foldChange, digits = 2),
                              "<br>", sep = " ")) %>%
-        plotly::layout(xaxis = list(title = input$xlab),
+        #xaxis = list(title = input$xlab)
+        plotly::layout(xaxis = list(title = "<a href = 'https://www.nytimes.com/'>The NY TIMES</a>"),
                yaxis = list(title = input$ylab)) %>% 
         plotly::layout(
             margin = list(l = input$left,
@@ -155,7 +156,7 @@ mainScatterNew <- function(input = NULL, data = NULL, source = NULL) {
             )
         }
         
-        p <- p %>%  plotly::layout(annotations = a)
+        p <- p %>%  plotly::layout(xaxis = list(title = "<a href = 'https://www.nytimes.com/'>The NY TIMES</a>"), annotations = a)
     }
     if (!is.null(input$svg) && input$svg == TRUE)
         p <- p %>% config(toImageButtonOptions = list(format = "svg"))
